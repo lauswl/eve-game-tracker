@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The sigma slab.
+
+  Sigma is what the app prints at the foot of the scoring table on every screen
+  where it is doing its job, so the launcher gets the app's own mark rather than
+  one invented for it: ink slab, misregistered red pass, nothing to read.
+
+  A PNG and not a vector, because the glyph is Anton's and a hand-traced outline
+  would be a drawing of it rather than it. Rendered from the shipped font at
+  every density; minSdk is 26, so the adaptive icon is what every device here
+  actually shows and there are no legacy square mipmaps to keep in step.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
+</adaptive-icon>

@@ -1,0 +1,42 @@
+*.iml
+.gradle/
+local.properties
+.idea/
+.agents/
+.claude/
+.codex/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin incremental compilation cache
+.kotlin/
+
+# Local Markdown notes; keep the public README and agent entry points.
+*.[mM][dD]
+!/README.md
+!/AGENTS.md
+!/CLAUDE.md
+
+# Signing and environment secrets
+*.jks
+*.keystore
+keystore.properties
+.env
+.env.*
+!.env.example
+
+# Built packages and local diagnostics
+*.apk
+*.aab
+*.apks
+*.log
+*.hprof
+*.profraw
+*.profdata
+*.trace
+
+# OS metadata
+.DS_Store
+Thumbs.db

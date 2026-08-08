@@ -1,0 +1,21 @@
+# App-owned cold-start path. Dependency profiles already cover Compose and
+# Room internals; these rules make sure the small layer connecting them is
+# compiled and startup-ordered too, including on low-end devices.
+HSPLcard/game/tracker/MainActivity;->**(**)**
+HSPLcard/game/tracker/MainActivityKt;->**(**)**
+HSPLcard/game/tracker/vm/TrackerViewModel;->**(**)**
+HSPLcard/game/tracker/vm/TrackerViewModel$Factory$1;->**(**)**
+HSPLcard/game/tracker/data/Repository;->**(**)**
+HSPLcard/game/tracker/data/TrackerDb;->**(**)**
+HSPLcard/game/tracker/data/TrackerDb$Companion;->**(**)**
+HSPLcard/game/tracker/ui/components/SheetKt;->**(**)**
+HSPLcard/game/tracker/ui/components/StickerKt;->**(**)**
+HSPLcard/game/tracker/ui/screens/HomeScreenKt;->**(**)**
+HSPLcard/game/tracker/ui/theme/Livery;->**(**)**
+HSPLcard/game/tracker/ui/theme/LiveryType;->**(**)**
+
+# The app layer is tiny; compile all of it as post-startup hot code so the
+# first visit to scoring, setup, stats, and selection does not pay JIT costs.
+# These rules deliberately omit S, so those screens do not crowd launch-order
+# layout. Compose/Room dependency code is covered by their own profiles.
+HPLcard/game/tracker/**->**(**)**

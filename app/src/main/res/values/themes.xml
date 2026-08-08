@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paper, not a system palette: the app draws its own LIVERY sheet. -->
+    <style name="Theme.GameTracker" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/paper</item>
+        <item name="android:statusBarColor">@color/paper</item>
+        <item name="android:navigationBarColor">@color/ink</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>
