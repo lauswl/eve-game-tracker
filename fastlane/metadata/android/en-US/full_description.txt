@@ -11,5 +11,4 @@ Features:
 * Stat View
 * Persistent player names and stats
 * Disable games you don't play
-* Export all data.
-
+* Export and import all data.

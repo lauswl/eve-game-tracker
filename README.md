@@ -1,16 +1,16 @@
 <img align="left" width="80" height="80"
-src="fastlane/metadata/android/en-US/images/icon.png" alt="Ultimate Game Tracker">
+src="fastlane/metadata/android/en-US/images/icon.png" alt="Eve Game Tracker">
 
-# Ultimate Game Tracker
+# Eve Game Tracker
 
 Track scores for card games like Uno, Poker, Gambio, Skat, and more.
 (You) **WILL** make an issue to add **YOUR** favorite game to the Eve Game Tracker.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/card.game.tracker/)
+     height="80">](https://f-droid.org/packages/eve.game.tracker/)
 
-Latest APK: [GitHub releases](https://github.com/Eve-146T/UltimateGameTracker/releases/latest).
+Latest APK: [GitHub releases](https://github.com/Eve-146T/eve-game-tracker/releases/latest).
 
 ## Screenshots
 
@@ -27,9 +27,9 @@ Latest APK: [GitHub releases](https://github.com/Eve-146T/UltimateGameTracker/re
 - It's a fancy table.
 - Tracks scores for Skat, Poker, Gambio, Durak, and Uno.
 - Supports custom games, player lists, undo, session summaries, and long-term stats.
-- Exports all local game data as JSON.
+- Exports all local game data as JSON and can import it as a full restore.
 
 ## License
 
-Ultimate Game Tracker is free software, licensed under the
+Eve Game Tracker is free software, licensed under the
 [GNU General Public License v3.0](LICENSE).

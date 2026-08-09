@@ -1,0 +1,3 @@
+Initial v0.1 release of Eve Game Tracker.
+
+Track sessions and scores for built-in or custom card games, view stats, manage players, and export or import all app data.

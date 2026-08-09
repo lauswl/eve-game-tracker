@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,17 +7,45 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+// Local release builds read keystore.properties; CI uses the equivalent
+// environment variables. Without either, Gradle still produces an unsigned
+// release APK so contributors and F-Droid can build from source.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
+}
+fun signingValue(property: String, environment: String): String? =
+    keystoreProps.getProperty(property) ?: System.getenv(environment)
+val releaseStoreFile = signingValue("storeFile", "KEYSTORE_FILE")
+
 android {
-    namespace = "card.game.tracker"
+    namespace = "eve.game.tracker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "card.game.tracker"
-        minSdk = 26
+        applicationId = "eve.game.tracker"
+        minSdk = 29
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // F-Droid reproducible builds reject Google's dependency-metadata block.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = signingValue("storePassword", "KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -23,11 +53,10 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            // Signed with the debug key so a release build can actually be put
-            // on the phone and timed. A debug build is not a fair thing to
-            // judge responsiveness by: it is not R8'd and ART will not
-            // ahead-of-time compile it the same way.
-            signingConfig = signingConfigs.getByName("debug")
+            vcsInfo { include = false }
+            if (releaseStoreFile != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

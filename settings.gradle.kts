@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "UltimateGameTracker"
+rootProject.name = "EveGameTracker"
 include(":app")
