@@ -36,12 +36,17 @@ jobs:
       - name: Test and build debug APK
         run: ./gradlew testDebugUnitTest lintDebug assembleDebug --stacktrace
 
-      - name: Upload debug APK
+      # Artifact quota is shared across the account. A full quota must not turn
+      # a successful compile/test run red; release APKs are also published as
+      # durable GitHub Release assets below.
+      - name: Upload debug APK (best effort)
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: eve-game-tracker-debug
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 1
 
   release:
     if: github.ref_type == 'tag'
@@ -116,9 +121,11 @@ jobs:
             --generate-notes \
             $prerelease
 
-      - name: Upload release APK artifact
+      - name: Upload release APK artifact (best effort)
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: eve-game-tracker-${{ github.ref_name }}
           path: eve-game-tracker-${{ github.ref_name }}.apk
           if-no-files-found: error
+          retention-days: 1
