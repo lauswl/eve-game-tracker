@@ -1,0 +1,15 @@
+Eve Game Tracker is a tracker for card games. (It's a fancy table)
+
+You <b>WILL</b> make an issue on github to add <b>YOUR</b> favorite game to the Eve Game Tracker.
+
+Currently supported games:
+Skat, Poker, Durak, Gambio, Uno.
+
+You can add custom games in a very intuitive way.
+
+Features:
+* Stat View
+* Persistent player names and stats
+* Disable games you don't play
+* Export all data.
+

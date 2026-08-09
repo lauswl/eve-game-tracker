@@ -4,7 +4,7 @@ src="fastlane/metadata/android/en-US/images/icon.png" alt="Ultimate Game Tracker
 # Ultimate Game Tracker
 
 Track scores for card games like Uno, Poker, Gambio, Skat, and more.
-(You) **WILL** make an issue to add **YOUR** favorite game to the Ultimate game tracker.
+(You) **WILL** make an issue to add **YOUR** favorite game to the Eve Game Tracker.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
