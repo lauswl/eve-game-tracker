@@ -1,0 +1,1 @@
+Make the Eve Game Tracker home title match the Setup and Stats headings.

@@ -43,7 +43,7 @@ fun ColumnScope.HomeBody(
     // No strapline. "Tap a game to deal in" told a first-time user something
     // they worked out by looking, then went on charging a line of the grid for
     // it every night after. The tiles get the space instead.
-    TitleText("Eve Game Tracker", fontSize = 32.sp)
+    TitleText("Eve Game Tracker")
     VSpace(14.dp)
 
     // A tile is a SQUARE, always.
