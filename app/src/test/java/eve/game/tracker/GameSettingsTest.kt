@@ -95,9 +95,9 @@ class GameSettingsTest {
      * library you have to read past is not a library.
      */
     @Test
-    fun `the library is the five games this table actually plays`() {
+    fun `the library includes Big Two and the five original games`() {
         assertEquals(
-            listOf("durak", "gambio", "poker", "skat", "uno"),
+            listOf("big_two", "durak", "gambio", "poker", "skat", "uno"),
             GameCatalog.all.map { it.key }.sorted(),
         )
     }
