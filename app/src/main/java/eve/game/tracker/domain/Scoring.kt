@@ -180,20 +180,20 @@ object Scoring {
         playerIds.associateWith { if (it == winnerId) 1 else 0 }
 
     /**
-     * Hong Kong-style Big Two settlement used by this table.
+     * Big Two settlement used by this table.
      *
-     * Base penalty is cards left, then:
-     *  - 1..7  -> x1
-     *  - 8..9  -> x2
+     * Penalty is based only on cards left:
+     *  - 1..7   -> x1
+     *  - 8..9   -> x2
      *  - 10..12 -> x3
-     *  - 13 -> x5
-     * Every unused 2 doubles that player again, and if the winner went out on a
-     * 2 every loser is doubled once more. Losers are negative; the winner gets
-     * the sum, so every round is exactly zero-sum.
+     *  - 13     -> x5
+     *
+     * There are deliberately no extra multipliers for holding a 2 or for the
+     * winner going out on a 2. Losers are negative; the winner gets the sum, so
+     * every round is exactly zero-sum.
      */
-    fun bigTwoPenalty(cardsLeft: Int, unusedTwos: Int = 0, winnerFinishedOnTwo: Boolean = false): Int {
+    fun bigTwoPenalty(cardsLeft: Int): Int {
         require(cardsLeft in 0..13) { "cardsLeft must be between 0 and 13" }
-        require(unusedTwos in 0..4) { "unusedTwos must be between 0 and 4" }
         if (cardsLeft == 0) return 0
         val cardMultiplier = when (cardsLeft) {
             in 1..7 -> 1
@@ -202,23 +202,18 @@ object Scoring {
             13 -> 5
             else -> error("unreachable")
         }
-        val twoMultiplier = 1 shl unusedTwos
-        val finishMultiplier = if (winnerFinishedOnTwo) 2 else 1
-        return cardsLeft * cardMultiplier * twoMultiplier * finishMultiplier
+        return cardsLeft * cardMultiplier
     }
 
     fun bigTwoRoundScores(
         winnerId: Long,
         cardsLeft: Map<Long, Int>,
-        unusedTwos: Map<Long, Int> = emptyMap(),
-        winnerFinishedOnTwo: Boolean = false,
     ): Map<Long, Int> {
         require(winnerId in cardsLeft.keys) { "winner must be present in cardsLeft" }
         require(cardsLeft[winnerId] == 0) { "winner must have 0 cards left" }
 
         val result = cardsLeft.mapValues { (playerId, left) ->
-            if (playerId == winnerId) 0
-            else -bigTwoPenalty(left, unusedTwos[playerId] ?: 0, winnerFinishedOnTwo)
+            if (playerId == winnerId) 0 else -bigTwoPenalty(left)
         }.toMutableMap()
         result[winnerId] = -result.values.sum()
         return result
