@@ -162,8 +162,6 @@ private fun BigTwoDock(
     var loserIndex by remember(winnerId) { mutableIntStateOf(0) }
     var cards by remember(winnerId) { mutableStateOf("") }
     var cardsLeft by remember(winnerId) { mutableStateOf(mapOf<Long, Int>()) }
-    var unusedTwos by remember(winnerId) { mutableStateOf(mapOf<Long, Int>()) }
-    var winnerFinishedOnTwo by remember(winnerId) { mutableStateOf(false) }
 
     val winner = active.firstOrNull { it.playerId == winnerId }
     val losers = active.filter { it.playerId != winnerId }
@@ -191,26 +189,14 @@ private fun BigTwoDock(
                 }
             }
         } else {
-            Row(
-                Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Sticker(
-                    onClick = { winnerId = null },
-                    modifier = Modifier.weight(1f),
-                    variant = StickerVariant.CHIP_ON,
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
-                ) { StickerLabel("Winner: ${winner.name}") }
-                Sticker(
-                    onClick = { winnerFinishedOnTwo = !winnerFinishedOnTwo },
-                    modifier = Modifier.weight(1f),
-                    variant = if (winnerFinishedOnTwo) StickerVariant.CHIP_ON else StickerVariant.CHIP,
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
-                ) { StickerLabel(if (winnerFinishedOnTwo) "Finished on 2 ×2" else "Finished on 2?") }
-            }
+            Sticker(
+                onClick = { winnerId = null },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                variant = StickerVariant.CHIP_ON,
+                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
+            ) { StickerLabel("Winner: ${winner.name}") }
 
             if (current != null) {
-                val twos = unusedTwos[current.playerId] ?: 0
                 Row(
                     Modifier.fillMaxWidth().padding(bottom = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,30 +210,14 @@ private fun BigTwoDock(
                     )
                 }
 
-                Row(
-                    Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Sticker(
-                        onClick = {
-                            unusedTwos = unusedTwos + (current.playerId to ((twos + 1) % 5))
-                        },
-                        modifier = Modifier.weight(1f),
-                        variant = if (twos > 0) StickerVariant.CHIP_ON else StickerVariant.CHIP,
-                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
-                    ) { StickerLabel("Unused 2s: $twos") }
-
-                    val preview = if (validCards) {
-                        Scoring.bigTwoPenalty(parsedCards!!, twos, winnerFinishedOnTwo)
-                    } else 0
-                    Sticker(
-                        onClick = {},
-                        modifier = Modifier.weight(1f),
-                        variant = StickerVariant.CHIP,
-                        enabled = false,
-                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
-                    ) { StickerLabel(if (validCards) "Penalty: −$preview" else "Penalty: —") }
-                }
+                val preview = if (validCards) Scoring.bigTwoPenalty(parsedCards!!) else 0
+                Sticker(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    variant = StickerVariant.CHIP,
+                    enabled = false,
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
+                ) { StickerLabel(if (validCards) "Penalty: −$preview" else "Penalty: —") }
 
                 Keypad(
                     modifier = Modifier.weight(1f),
@@ -261,9 +231,7 @@ private fun BigTwoDock(
                     onBackspace = { cards = cards.dropLast(1) },
                     onCommit = {
                         val left = parsedCards ?: return@Keypad
-                        val cappedTwos = (unusedTwos[current.playerId] ?: 0).coerceAtMost(left.coerceAtMost(4))
                         val nextCards = cardsLeft + (current.playerId to left)
-                        val nextTwos = unusedTwos + (current.playerId to cappedTwos)
 
                         if (loserIndex >= losers.lastIndex) {
                             val fullCards = nextCards + (winner.playerId to 0)
@@ -271,14 +239,11 @@ private fun BigTwoDock(
                                 Scoring.bigTwoRoundScores(
                                     winnerId = winner.playerId,
                                     cardsLeft = fullCards,
-                                    unusedTwos = nextTwos,
-                                    winnerFinishedOnTwo = winnerFinishedOnTwo,
                                 )
                             )
                             winnerId = null
                         } else {
                             cardsLeft = nextCards
-                            unusedTwos = nextTwos
                             loserIndex += 1
                             cards = ""
                         }
