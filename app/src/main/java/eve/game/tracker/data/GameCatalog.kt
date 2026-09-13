@@ -132,6 +132,11 @@ object GameCatalog {
     val all: List<CatalogEntry> = listOf(
         score("skat", "Skat", "♠", keywords = "declarer german"),
         CatalogEntry("poker", "Poker", "♥", Shape.LEDGER, keywords = "cash holdem money"),
+        CatalogEntry(
+            "big_two", "Big Two", "♠", Shape.PER_PLAYER_SCORE,
+            direction = Direction.HIGHER_BETTER,
+            keywords = "big2 chinese poker dai di chor dai di pusoy dos",
+        ),
         score("gambio", "Gambio", "♦", low = true, keywords = "cabo kabo cambio"),
         CatalogEntry(
             "durak", "Durak", "♣", Shape.LOSER_ONLY,
