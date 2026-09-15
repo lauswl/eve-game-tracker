@@ -78,44 +78,56 @@ fun ScoringScreen(
     // column. Every one of them was already on screen, printed larger, in the
     // thing you are actually looking at. The table gets the space instead.
     LiverySheet {
-        when (live.shape) {
-            Shape.LEDGER -> LedgerTable(live, Modifier.weight(1.3f))
-            Shape.PER_PLAYER_SCORE -> RoundTable(
-                live = live,
-                modifier = Modifier.weight(1.5f).fillMaxWidth(),
-                draft = draft,
-                cursorPlayerId = typing?.playerId,
-            )
-            // Durak's table reads fine with zero rounds — columns and zero
-            // totals — and needs no special empty state.
-            else -> RoundTable(live, Modifier.weight(1.5f).fillMaxWidth())
+        if (live.game.gameKey == "big_two") {
+            RoundTable(live, Modifier.weight(1.5f).fillMaxWidth())
+        } else {
+            when (live.shape) {
+                Shape.LEDGER -> LedgerTable(live, Modifier.weight(1.3f))
+                Shape.PER_PLAYER_SCORE -> RoundTable(
+                    live = live,
+                    modifier = Modifier.weight(1.5f).fillMaxWidth(),
+                    draft = draft,
+                    cursorPlayerId = typing?.playerId,
+                )
+                // Durak's table reads fine with zero rounds — columns and zero
+                // totals — and needs no special empty state.
+                else -> RoundTable(live, Modifier.weight(1.5f).fillMaxWidth())
+            }
         }
 
         VSpace(10.dp)
 
-        when (live.shape) {
-            Shape.PER_PLAYER_SCORE -> PerPlayerKeypad(
+        if (live.game.gameKey == "big_two") {
+            BigTwoDock(
                 active = active,
-                current = typing,
-                atLast = idx >= active.lastIndex,
-                draft = draft,
-                onDraft = { draft = it },
-                onCommitRound = {
-                    onRecordScores(active.associate { p -> p.playerId to (draft[p.playerId]?.toIntOrNull() ?: 0) })
-                    draft = emptyMap()
-                    cursor = 0
-                },
-                onAdvance = { cursor = idx + 1 },
-                // Was 2.1 against a table of 1. The keys were already the
-                // biggest thing on the screen by a distance and a key does not
-                // get more pressable past a thumb's width, so the table takes
-                // the difference.
-                modifier = Modifier.weight(1.75f),
+                onRecord = onRecordScores,
+                modifier = Modifier.weight(2.1f),
             )
-            Shape.LOSER_ONLY -> LoserDock(active, onRecordLoser, Modifier.weight(1.3f))
-            Shape.WINNER_ONLY -> WinnerDock(active, onRecordScores, Modifier.weight(1.3f))
-            Shape.RANKING -> RankDock(active, onRecordScores, Modifier.weight(1.3f))
-            Shape.LEDGER -> LedgerDock(live, active, onLedger, Modifier.weight(2.4f))
+        } else {
+            when (live.shape) {
+                Shape.PER_PLAYER_SCORE -> PerPlayerKeypad(
+                    active = active,
+                    current = typing,
+                    atLast = idx >= active.lastIndex,
+                    draft = draft,
+                    onDraft = { draft = it },
+                    onCommitRound = {
+                        onRecordScores(active.associate { p -> p.playerId to (draft[p.playerId]?.toIntOrNull() ?: 0) })
+                        draft = emptyMap()
+                        cursor = 0
+                    },
+                    onAdvance = { cursor = idx + 1 },
+                    // Was 2.1 against a table of 1. The keys were already the
+                    // biggest thing on the screen by a distance and a key does not
+                    // get more pressable past a thumb's width, so the table takes
+                    // the difference.
+                    modifier = Modifier.weight(1.75f),
+                )
+                Shape.LOSER_ONLY -> LoserDock(active, onRecordLoser, Modifier.weight(1.3f))
+                Shape.WINNER_ONLY -> WinnerDock(active, onRecordScores, Modifier.weight(1.3f))
+                Shape.RANKING -> RankDock(active, onRecordScores, Modifier.weight(1.3f))
+                Shape.LEDGER -> LedgerDock(live, active, onLedger, Modifier.weight(2.4f))
+            }
         }
 
         VSpace(10.dp)
@@ -132,6 +144,114 @@ fun ScoringScreen(
                 variant = StickerVariant.CHIP,
                 departure = true,
             ) { StickerLabel("End session") }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// BIG TWO — winner takes the zero-sum settlement
+// ---------------------------------------------------------------------------
+
+@Composable
+private fun BigTwoDock(
+    active: List<Participant>,
+    onRecord: (Map<Long, Int>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var winnerId by remember(active.map { it.playerId }) { mutableStateOf<Long?>(null) }
+    var loserIndex by remember(winnerId) { mutableIntStateOf(0) }
+    var cards by remember(winnerId) { mutableStateOf("") }
+    var cardsLeft by remember(winnerId) { mutableStateOf(mapOf<Long, Int>()) }
+
+    val winner = active.firstOrNull { it.playerId == winnerId }
+    val losers = active.filter { it.playerId != winnerId }
+    val current = losers.getOrNull(loserIndex)
+    val parsedCards = cards.toIntOrNull()
+    val validCards = parsedCards != null && parsedCards in 1..13
+
+    Column(modifier) {
+        if (winner == null) {
+            MutedText("Who won?")
+            VSpace(8.dp)
+            active.chunked(2).forEach { row ->
+                Row(
+                    Modifier.fillMaxWidth().weight(1f).padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    row.forEach { p ->
+                        Sticker(
+                            onClick = { winnerId = p.playerId },
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            variant = StickerVariant.NORMAL,
+                        ) { FittedStickerLabel(p.name, fraction = 0.42f) }
+                    }
+                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        } else {
+            Sticker(
+                onClick = { winnerId = null },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                variant = StickerVariant.CHIP_ON,
+                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
+            ) { StickerLabel("Winner: ${winner.name}") }
+
+            if (current != null) {
+                Row(
+                    Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    MutedText("${current.name.uppercase()} · ${loserIndex + 1}/${losers.size}")
+                    DigitsText(
+                        text = "${cards.ifEmpty { "–" }} cards",
+                        fontSize = 30.sp,
+                        color = if (validCards) Livery.Ink else Livery.Muted,
+                    )
+                }
+
+                val preview = if (validCards) Scoring.bigTwoPenalty(parsedCards!!) else 0
+                Sticker(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    variant = StickerVariant.CHIP,
+                    enabled = false,
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 10.dp),
+                ) { StickerLabel(if (validCards) "Penalty: −$preview" else "Penalty: —") }
+
+                Keypad(
+                    modifier = Modifier.weight(1f),
+                    onDigit = { d ->
+                        val next = cards + d
+                        if (next.length <= 2 && (next.toIntOrNull() ?: 99) <= 13) cards = next
+                    },
+                    onNegate = {},
+                    negateLabel = "00",
+                    allowNegative = false,
+                    onBackspace = { cards = cards.dropLast(1) },
+                    onCommit = {
+                        val left = parsedCards ?: return@Keypad
+                        val nextCards = cardsLeft + (current.playerId to left)
+
+                        if (loserIndex >= losers.lastIndex) {
+                            val fullCards = nextCards + (winner.playerId to 0)
+                            onRecord(
+                                Scoring.bigTwoRoundScores(
+                                    winnerId = winner.playerId,
+                                    cardsLeft = fullCards,
+                                )
+                            )
+                            winnerId = null
+                        } else {
+                            cardsLeft = nextCards
+                            loserIndex += 1
+                            cards = ""
+                        }
+                    },
+                    commitLabel = if (loserIndex >= losers.lastIndex) "Add round" else "Next player",
+                    commitEnabled = validCards,
+                )
+            }
         }
     }
 }

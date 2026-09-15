@@ -180,6 +180,44 @@ object Scoring {
         playerIds.associateWith { if (it == winnerId) 1 else 0 }
 
     /**
+     * Big Two settlement used by this table.
+     *
+     * Penalty is based only on cards left:
+     *  - 0..7   -> x1
+     *  - 8..12  -> x2
+     *  - 13     -> x3
+     *
+     * There are deliberately no extra multipliers for holding a 2 or for the
+     * winner going out on a 2. Losers are negative; the winner gets the sum, so
+     * every round is exactly zero-sum.
+     */
+    fun bigTwoPenalty(cardsLeft: Int): Int {
+        require(cardsLeft in 0..13) { "cardsLeft must be between 0 and 13" }
+        if (cardsLeft == 0) return 0
+        val cardMultiplier = when (cardsLeft) {
+            in 0..7 -> 1
+            in 8..12 -> 2
+            13 -> 3
+            else -> error("unreachable")
+        }
+        return cardsLeft * cardMultiplier
+    }
+
+    fun bigTwoRoundScores(
+        winnerId: Long,
+        cardsLeft: Map<Long, Int>,
+    ): Map<Long, Int> {
+        require(winnerId in cardsLeft.keys) { "winner must be present in cardsLeft" }
+        require(cardsLeft[winnerId] == 0) { "winner must have 0 cards left" }
+
+        val result = cardsLeft.mapValues { (playerId, left) ->
+            if (playerId == winnerId) 0 else -bigTwoPenalty(left)
+        }.toMutableMap()
+        result[winnerId] = -result.values.sum()
+        return result
+    }
+
+    /**
      * Full standings, ranked. Ties share a rank and the following rank is
      * skipped (1, 2, 2, 4) — a tie is a tie and the app does not invent a
      * tiebreak it was not told about.

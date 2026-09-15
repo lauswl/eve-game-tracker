@@ -244,6 +244,33 @@ class ScoringTest {
         assertNull(Scoring.bestRound(winnerTakes, anna, rounds))
     }
 
+    // ---------------------------------------------------------- BIG TWO
+
+    @Test
+    fun `big two base card multipliers match table rules`() {
+        assertEquals(0, Scoring.bigTwoPenalty(0))
+        assertEquals(7, Scoring.bigTwoPenalty(7))
+        assertEquals(16, Scoring.bigTwoPenalty(8))
+        assertEquals(20, Scoring.bigTwoPenalty(10))
+        assertEquals(24, Scoring.bigTwoPenalty(12))
+        assertEquals(39, Scoring.bigTwoPenalty(13))
+    }
+
+    @Test
+    fun `big two round is zero sum and winner receives every loser penalty`() {
+        val scores = Scoring.bigTwoRoundScores(
+            winnerId = 1,
+            cardsLeft = mapOf(1L to 0, 2L to 8, 3L to 11, 4L to 6),
+        )
+        // Ben: 8×2 = 16; Cilli: 11×2 = 22; Dora: 6×1 = 6.
+        // Anna receives 44.
+        assertEquals(44, scores[1L])
+        assertEquals(-16, scores[2L])
+        assertEquals(-22, scores[3L])
+        assertEquals(-6, scores[4L])
+        assertEquals(0, scores.values.sum())
+    }
+
     // ------------------------------------------------------------ LEDGER
 
     private val poker = GameConfig(Shape.LEDGER)
