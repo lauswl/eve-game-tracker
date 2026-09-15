@@ -183,10 +183,9 @@ object Scoring {
      * Big Two settlement used by this table.
      *
      * Penalty is based only on cards left:
-     *  - 1..7   -> x1
-     *  - 8..9   -> x2
-     *  - 10..12 -> x3
-     *  - 13     -> x5
+     *  - 0..7   -> x1
+     *  - 8..12  -> x2
+     *  - 13     -> x3
      *
      * There are deliberately no extra multipliers for holding a 2 or for the
      * winner going out on a 2. Losers are negative; the winner gets the sum, so
@@ -196,10 +195,9 @@ object Scoring {
         require(cardsLeft in 0..13) { "cardsLeft must be between 0 and 13" }
         if (cardsLeft == 0) return 0
         val cardMultiplier = when (cardsLeft) {
-            in 1..7 -> 1
-            in 8..9 -> 2
-            in 10..12 -> 3
-            13 -> 5
+            in 0..7 -> 1
+            in 8..12 -> 2
+            13 -> 3
             else -> error("unreachable")
         }
         return cardsLeft * cardMultiplier
